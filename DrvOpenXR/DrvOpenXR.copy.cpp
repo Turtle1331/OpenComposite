@@ -7,15 +7,9 @@
 #include "../OpenOVR/Misc/xr_ext.h"
 #include "XrBackend.h"
 
-// TODO Turtle1331 should be abstracted in compositor_backend.h
-#include <bits/stdint-uintn.h>
-#include <math.h>
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
-
 #include <string>
 
-static VkDevice CreateTemporaryVulkanDevice();
+static ID3D11Device* CreateTemporaryD3D11Device();
 
 IBackend* DrvOpenXR::CreateOpenXRBackend()
 {
@@ -27,12 +21,11 @@ IBackend* DrvOpenXR::CreateOpenXRBackend()
 	}
 
 	// FIXME should be removed, for testing only
-	// TODO Turtle1331 what do
-	// OOVR_FALSE_ABORT(SetEnvironmentVariableA("XR_CORE_VALIDATION_EXPORT_TYPE", "text"));
-	// OOVR_FALSE_ABORT(SetEnvironmentVariableA("XR_API_LAYER_PATH",
-	//     "C:\\Users\\ZNix\\source\\repos\\OpenCompositeXR\\build-openxr\\src\\api_layers"))
-	// OOVR_FALSE_ABORT(SetEnvironmentVariableA("XR_CORE_VALIDATION_FILE_NAME",
-	//     "C:\\Users\\ZNix\\source\\repos\\OpenCompositeXR\\validation-xr.log"))
+	OOVR_FALSE_ABORT(SetEnvironmentVariableA("XR_CORE_VALIDATION_EXPORT_TYPE", "text"));
+	OOVR_FALSE_ABORT(SetEnvironmentVariableA("XR_API_LAYER_PATH",
+	    "C:\\Users\\ZNix\\source\\repos\\OpenCompositeXR\\build-openxr\\src\\api_layers"))
+	OOVR_FALSE_ABORT(SetEnvironmentVariableA("XR_CORE_VALIDATION_FILE_NAME",
+	    "C:\\Users\\ZNix\\source\\repos\\OpenCompositeXR\\validation-xr.log"))
 
 	// Create the OpenXR instance - this is the overall handle that connects us to the runtime
 	// https://www.khronos.org/registry/OpenXR/specs/1.0/refguide/openxr-10-reference-guide.pdf
@@ -91,15 +84,20 @@ IBackend* DrvOpenXR::CreateOpenXRBackend()
 	//  less have a handle to it) until it submits it's first frame.
 	// FIXME I'm only using it here as a POC since it's easier to set up than Vulkan, but we'll need to switch over
 	//  to that later on in the name of compatibility.
-	XrGraphicsBindingVulkanKHR vulkanInfo{};
-	vulkanInfo.type = XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR;
-	vulkanInfo.device = CreateTemporaryVulkanDevice(); // Nooooo
+	XrGraphicsBindingD3D11KHR d3dInfo{};
+	d3dInfo.type = XR_TYPE_GRAPHICS_BINDING_D3D11_KHR;
+	d3dInfo.device = CreateTemporaryD3D11Device(); // Nooooo
 
 	XrSessionCreateInfo sessionInfo{};
 	sessionInfo.type = XR_TYPE_SESSION_CREATE_INFO;
 	sessionInfo.systemId = xr_system;
-	sessionInfo.next = &vulkanInfo;
+	sessionInfo.next = &d3dInfo;
 	OOVR_FAILED_XR_ABORT(xrCreateSession(xr_instance, &sessionInfo, &xr_session));
+
+	// Start the session running
+	XrSessionBeginInfo beginInfo{ XR_TYPE_SESSION_BEGIN_INFO };
+	beginInfo.primaryViewConfigurationType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
+	OOVR_FAILED_XR_ABORT(xrBeginSession(xr_session, &beginInfo));
 
 	// Setup the OpenXR globals, which uses the current session so we have to do this last
 	xr_gbl = new XrSessionGlobals();
@@ -113,63 +111,23 @@ IBackend* DrvOpenXR::CreateOpenXRBackend()
  *
  * Yes this leaves a D3D device, no I don't care for now.
  */
-static VkDevice CreateTemporaryVulkanDevice()
+static ID3D11Device* CreateTemporaryD3D11Device()
 {
 	// The spec requires that we call this first, and use it to get the correct things
-	XrGraphicsRequirementsVulkanKHR graphicsRequirements{};
-	graphicsRequirements.type = XR_TYPE_GRAPHICS_REQUIREMENTS_VULKAN_KHR;
-	XrResult res = xr_ext->xrGetVulkanGraphicsRequirementsKHR(xr_instance, xr_system, &graphicsRequirements);
+	XrGraphicsRequirementsD3D11KHR graphicsRequirements{};
+	graphicsRequirements.type = XR_TYPE_GRAPHICS_REQUIREMENTS_D3D11_KHR;
+	XrResult res = xr_ext->xrGetD3D11GraphicsRequirementsKHR(xr_instance, xr_system, &graphicsRequirements);
 	OOVR_FAILED_XR_ABORT(res);
 
-	// Enumerate physical devices
-	VkPhysicalDevice *physicalDevices = nullptr;
-	uint32_t physicalDeviceCount = 0;
-	// TODO Turtle1331 pass in VkInstance
-	VkResult enumeratePhysicalRes = vkEnumeratePhysicalDevices(nullptr, &physicalDeviceCount, physicalDevices);
-	OOVR_FAILED_VK_ABORT(enumeratePhysicalRes);
-	VkPhysicalDevice physicalDevice = physicalDevices[0];
-
-	// Get queue family properties
-	VkQueueFamilyProperties *queueFamilyProperties = nullptr;
-	uint32_t queueFamilyPropertyCount = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(
-		physicalDevice,
-		&queueFamilyPropertyCount,
-		queueFamilyProperties
-	);
-
-	// Setup creation info
-	const float queuePriorities[] = {0.0f};
-    VkDeviceQueueCreateInfo queueCreateInfo{
-        VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-        nullptr,
-        0,
-        0,
-        1,
-        queuePriorities,
-    };
-	VkDeviceCreateInfo createInfo{
-		VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-		nullptr,
-		0,
-		1,
-		&queueCreateInfo,
-		0,
-		nullptr,
-		0,
-		nullptr,
-		nullptr,
-	};
+	// TODO use the proper adapter
+	IDXGIAdapter* adapter = nullptr;
+	ID3D11Device* dev = nullptr;
 
 	// Such a horrid hack - of all the ugly things we do in OpenComposite, this has to be one of the worst.
-	VkDevice* dev = nullptr;
-	VkResult createDeviceRes = vkCreateDevice(
-		physicalDevice,
-		&createInfo,
-		nullptr,
-		dev
-	);
-	OOVR_FAILED_VK_ABORT(createDeviceRes);
+	HRESULT createDeviceRes = D3D11CreateDevice(adapter, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
+	    &graphicsRequirements.minFeatureLevel, 1,
+	    D3D11_SDK_VERSION, &dev, nullptr, nullptr);
+	OOVR_FAILED_DX_ABORT(createDeviceRes);
 
-	return *dev;
+	return dev;
 }
