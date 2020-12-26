@@ -1,5 +1,12 @@
 #pragma once
 
+#ifndef HRESULT
+	typedef long HRESULT;
+#endif
+#ifndef FAILED
+	#define FAILED(Status) ((HRESULT)(Status)<0)
+#endif
+
 void oovr_log_raw(const char *file, long line, const char *func, const char *msg);
 void oovr_log_raw_format(const char *file, long line, const char *func, const char *msg, ...);
 #define OOVR_LOG(msg) oovr_log_raw(__FILE__, __LINE__, __FUNCTION__, msg);
@@ -20,6 +27,16 @@ HRESULT res = (expression); \
 if (FAILED(res)) { \
 	OOVR_LOGF("DX Call failed with: 0x%08x", res); \
 	OOVR_ABORT_T("OOVR_FAILED_DX_ABORT failed on: " #expression, "OpenComposite DirectX error - see log for details") \
+} \
+}
+
+// TODO Turtle1331 Vulkan API validation helpers?
+#define OOVR_FAILED_VK_ABORT(expression) \
+{ \
+HRESULT res = (expression); \
+if (FAILED(res)) { \
+	OOVR_LOGF("Vulkan Call failed with: 0x%08x", res); \
+	OOVR_ABORT_T("OOVR_FAILED_VK_ABORT failed on: " #expression, "OpenComposite Vulkan error - see log for details") \
 } \
 }
 
