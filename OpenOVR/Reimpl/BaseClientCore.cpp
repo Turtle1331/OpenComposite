@@ -9,7 +9,9 @@
 
 #include "Misc/json/json.h"
 
-#include <ShlObj.h>
+#ifdef WIN32
+	#include <ShlObj.h>
+#endif
 
 using namespace std;
 using namespace vr;
@@ -130,7 +132,7 @@ static wstring GetAppSettingsPath() {
 	path = rwchPath;
 #elif defined( OSX )
 #error "Unsupported platform"
-#elif defined( LINUX )
+#elif defined( __linux__ )
 #error "Unsupported platform"
 #else
 #error "Unsupported platform"
@@ -144,7 +146,7 @@ static wstring GetAppSettingsPath() {
 static wstring GetOpenVRConfigPath() {
 	wstring sConfigPath = GetAppSettingsPath();
 
-#if defined( _WIN32 ) || defined( LINUX )
+#if defined( _WIN32 ) || defined( __linux__ )
 	sConfigPath += L"/openvr";
 #elif defined ( OSX )
 	sConfigPath += L"/.openvr";
@@ -157,7 +159,7 @@ static wstring GetOpenVRConfigPath() {
 string BaseClientCore::GetAlternativeRuntimePath() {
 	wstring regPath = GetOpenVRConfigPath();
 
-#if defined( _WIN32 ) || defined( POSIX )
+#if defined( _WIN32 ) || defined( OSX ) || defined( __linux__ )
 	regPath += L"/openvrpaths.vrpath";
 #else
 #error "Unsupported platform"

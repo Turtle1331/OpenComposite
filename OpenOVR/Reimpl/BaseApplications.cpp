@@ -111,6 +111,7 @@ bool BaseApplications::IsQuitUserPromptRequested() {
 	STUBBED();
 }
 EVRApplicationError BaseApplications::LaunchInternalProcess(const char *pchBinaryPath, const char *pchArguments, const char *pchWorkingDirectory) {
+#ifdef WIN32
 	OOVR_LOG("Launching new app process: following values are path,args,workingDir:")
 	OOVR_LOG(pchBinaryPath);
 	OOVR_LOG(pchArguments);
@@ -136,6 +137,10 @@ EVRApplicationError BaseApplications::LaunchInternalProcess(const char *pchBinar
 	}
 
 	return VRApplicationError_LaunchFailed;
+#else
+	// TODO Turtle1331 fork-exec a process here?
+	STUBBED();
+#endif
 }
 uint32_t BaseApplications::GetCurrentSceneProcessId() {
 	STUBBED();
