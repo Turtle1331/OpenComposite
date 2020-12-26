@@ -1,3 +1,5 @@
+#ifndef OC_KEYBOARD_PORT
+
 #pragma once
 
 #include <d3d11.h>
@@ -82,3 +84,5 @@ private:
 
 	void SubmitEvent(vr::EVREventType ev, wchar_t ch);
 };
+
+#endif

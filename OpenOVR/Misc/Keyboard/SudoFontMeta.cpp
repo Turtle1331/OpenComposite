@@ -1,3 +1,5 @@
+#ifndef OC_KEYBOARD_PORT
+
 #include "stdafx.h"
 #include "SudoFontMeta.h"
 
@@ -132,3 +134,5 @@ int SudoFontMeta::Width(wstring str) {
 		width += Width(ch);
 	return width;
 }
+
+#endif

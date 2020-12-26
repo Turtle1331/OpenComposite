@@ -18,6 +18,10 @@ else()
 	set(GRAPHICS_API_SUPPORT_FLAGS -DSUPPORT_VK -DSUPPORT_GL)
 endif()
 
+# Disable keyboard for now
+# // TODO Turtle1331 re-enable this at some point
+set(GRAPHICS_API_SUPPORT_FLAGS ${GRAPHICS_API_SUPPORT_FLAGS} OC_KEYBOARD_PORT)
+
 # === Runtime Switcher ===
 include_external_msproject(
 	RuntimeSwitcher ${CMAKE_SOURCE_DIR}/RuntimeSwitcher/RuntimeSwitcher.csproj

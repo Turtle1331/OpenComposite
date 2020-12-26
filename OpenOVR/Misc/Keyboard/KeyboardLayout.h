@@ -1,3 +1,5 @@
+#ifndef OC_KEYBOARD_PORT
+
 #pragma once
 #include <string>
 #include <vector>
@@ -34,3 +36,5 @@ private:
 	int width = 0;
 };
 
+
+#endif

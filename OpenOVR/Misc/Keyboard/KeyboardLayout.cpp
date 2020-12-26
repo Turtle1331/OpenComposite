@@ -1,3 +1,5 @@
+#ifndef OC_KEYBOARD_PORT
+
 #include "stdafx.h"
 #include "KeyboardLayout.h"
 #include "VRKeyboard.h"
@@ -241,3 +243,5 @@ KeyboardLayout::KeyboardLayout(std::vector<char> data) {
 
 KeyboardLayout::~KeyboardLayout() {
 }
+
+#endif

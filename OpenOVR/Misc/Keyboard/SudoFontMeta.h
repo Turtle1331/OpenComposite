@@ -1,3 +1,5 @@
+#ifndef OC_KEYBOARD_PORT
+
 #pragma once
 #include <string>
 #include <map>
@@ -53,3 +55,5 @@ private:
 	unsigned int lineHeight;
 };
 
+
+#endif
