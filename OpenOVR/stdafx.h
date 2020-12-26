@@ -39,3 +39,18 @@
 
     // TODO Turtle1331 figure out how to write the shared library entry point (replacement for dllmain.cpp)
 #endif
+
+#ifndef WIN32
+    #include <linux/limits.h>
+
+    typedef int errno_t;
+
+    // Source: https://ubuntuforums.org/showthread.php?t=533304
+    typedef unsigned long DWORD;
+    typedef short WCHAR;
+    typedef void * HANDLE;
+    #define MAX_PATH PATH_MAX
+    typedef unsigned char BYTE;
+    typedef unsigned short WORD;
+    typedef unsigned int BOOL;
+#endif

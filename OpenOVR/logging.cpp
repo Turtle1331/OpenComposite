@@ -5,6 +5,7 @@
 	#include "stdafx.h"
 #else
 	#include <iostream>
+	#include <cstdarg>
 #endif
 
 using namespace std;
