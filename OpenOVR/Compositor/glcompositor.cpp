@@ -1,14 +1,17 @@
+// TODO Turtle1331 uncomment this
+/*
 #ifdef SUPPORT_GL
 
 #include "stdafx.h"
 #include "glcompositor.h"
 
-#include "libovr_wrapper.h"
+// #include "libovr_wrapper.h"
 
 #include <string>
 
-#include "OVR_CAPI_GL.h"
-#include "GL/CAPI_GLE.h"
+// #include "OVR_CAPI_GL.h"
+// #include "GL/CAPI_GLE.h"
+#include "../Misc/xr_ext.h"
 
 using namespace std;
 
@@ -94,3 +97,5 @@ void GLCompositor::InvokeCubemap(const vr::Texture_t * textures) {
 }
 
 #endif
+
+*/

@@ -123,6 +123,9 @@ int Config::ini_handler(void* user, const char* pSection,
 	ABORT(err);
 }
 
+// TODO Turtle1331 hack hack hack
+
+#ifdef WIN32
 static int wini_parse(const wchar_t* filename, ini_handler handler, void* user) {
 	FILE* file;
 	errno_t err = _wfopen_s(&file, filename, L"r");
@@ -175,6 +178,7 @@ Config::Config() {
 
 	// Everything should have been set up by ini_handler
 }
+#endif
 
 Config::~Config() {
 }

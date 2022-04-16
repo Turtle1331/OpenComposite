@@ -84,7 +84,7 @@ if (WIN32)
 else()
 	# TODO Turtle1331 should we include -DXR_USE_PLATFORM_(XLIB|XCB|WAYLAND) here?
 	target_compile_definitions(OpenXR PRIVATE -DXR_OS_LINUX
-	-DXR_USE_GRAPHICS_API_OPENGL -DXR_USE_GRAPHICS_API_VULKAN)
+	-DXR_USE_GRAPHICS_API_OPENGL -DXR_USE_GRAPHICS_API_VULKAN -DOC_XR_PORT)
 endif()
 target_link_libraries(OpenXR PUBLIC advapi32 pathcch)
 

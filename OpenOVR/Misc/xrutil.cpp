@@ -26,7 +26,12 @@ XrViewConfigurationView& xr_main_view(XruEye view_id)
 
 XrExt::XrExt()
 {
+// TODO Turtle1331 support all the flags
+#if defined(SUPPORT_DX) && defined(SUPPORT_DX11)
 	XrResult res = xrGetInstanceProcAddr(xr_instance, "xrGetD3D11GraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetD3D11GraphicsRequirementsKHR);
+#elif defined(SUPPORT_VK)
+	XrResult res = xrGetInstanceProcAddr(xr_instance, "xrGetVulkanGraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetVulkanGraphicsRequirementsKHR);
+#endif
 	OOVR_FAILED_XR_ABORT(res);
 }
 
